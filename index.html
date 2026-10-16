@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#070708" />
+<meta name="apple-mobile-web-app-title" content="AEGIS" />
+<meta name="description" content="AEGIS — Florida traffic-stop companion. Record the stop, know the script, know the law." />
+<title>AEGIS</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root { color-scheme: dark; --bg:#070708; --surface:#101012; --elev:#17171b; --fg:#f4f1ea; --muted:#9a958c; --subtle:#6b675f; --line:#26262b; --red:#c41e3a; --blue:#1d4ed8; --danger:#9f1d1d; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; min-height:100%; background:var(--bg); color:var(--fg); font-family:Outfit,system-ui,sans-serif; }
+  body { padding-bottom: 88px; }
+  button, [role="tab"] { cursor: pointer; font: inherit; color: inherit; }
+  h1,h2,h3 { font-family:"Cormorant Garamond",serif; font-weight:500; letter-spacing:-0.02em; margin:0; text-wrap:balance; }
+  p { text-wrap: pretty; }
+  .kicker { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin:0; }
+  .wrap { width:min(1040px, 100%); margin:0 auto; padding: 8px 20px 24px; }
+  .lightbar { position:relative; }
+  .housing { display:grid; grid-template-columns:repeat(18,1fr); gap:3px; height:16px; padding:3px 8px; background:#050506; }
+  .cell { display:block; height:100%; border-radius:1px; opacity:.14; }
+  .cell.r { background:var(--red); animation: L 1.05s infinite; }
+  .cell.b { background:var(--blue); animation: R 1.05s infinite; }
+  .live .cell { animation-duration:.42s; }
+  @keyframes L { 0%,42%{opacity:1} 55%,100%{opacity:.12} }
+  @keyframes R { 0%,42%{opacity:.12} 55%,100%{opacity:1} }
+  header.top { display:flex; align-items:baseline; justify-content:space-between; padding:12px 0; }
+  .brand { font-family:"Cormorant Garamond",serif; font-size:28px; }
+  .sub { margin-left:8px; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+  .row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+  .seg { display:inline-flex; height:44px; padding:4px; border-radius:999px; background:var(--surface); box-shadow:0 0 0 1px rgba(255,255,255,.08); }
+  .seg button { height:36px; min-width:96px; border:0; border-radius:999px; background:transparent; color:var(--muted); }
+  .seg button.on { background:#e8e2d6; color:#0c0c0e; }
+  .hero { font-size:44px; line-height:.95; margin:16px 0 8px; }
+  .hero span { display:block; font-style:italic; color:var(--muted); }
+  .meta { color:var(--muted); font-size:14px; font-variant-numeric:tabular-nums; }
+  .grid { display:grid; gap:16px; }
+  @media (min-width:900px) { .grid.two { grid-template-columns:1fr 1fr; align-items:start; } }
+  .card { background:var(--surface); border-radius:20px; padding:16px 18px; box-shadow:0 0 0 1px rgba(255,255,255,.08); }
+  .card + .card { margin-top:12px; }
+  .say { font-family:"Cormorant Garamond",serif; font-size:22px; line-height:1.25; margin:8px 0 0; }
+  .record-wrap { display:flex; flex-direction:column; align-items:center; }
+  .ring { width:160px; height:160px; border-radius:50%; display:grid; place-items:center; box-shadow:0 0 0 1px rgba(255,255,255,.08); margin-top:12px; }
+  .rec { width:144px; height:144px; border-radius:50%; border:0; background:var(--elev); }
+  .rec.on { background:var(--danger); }
+  .dot { width:56px; height:56px; border-radius:50%; background:var(--red); display:block; margin:0 auto; }
+  .rec.on .dot { width:32px; height:32px; border-radius:4px; }
+  .view { display:none; }
+  .view.on { display:block; }
+  nav.tabs { position:fixed; left:0; right:0; bottom:0; background:rgba(7,7,8,.96); border-top:1px solid var(--line); padding-bottom:max(8px, env(safe-area-inset-bottom)); z-index:5; }
+  nav.tabs ul { list-style:none; margin:0 auto; padding:0; width:min(1040px,100%); display:grid; grid-template-columns:repeat(5,1fr); }
+  nav.tabs button { width:100%; min-height:56px; border:0; background:transparent; color:var(--muted); font-size:11px; letter-spacing:.04em; }
+  nav.tabs button.on { color:var(--fg); }
+  input, .chip { font:inherit; }
+  input[type="search"] { width:100%; height:48px; border:0; border-radius:12px; background:var(--surface); color:var(--fg); padding:0 16px; box-shadow:0 0 0 1px rgba(255,255,255,.08); }
+  .chips { display:flex; gap:8px; overflow:auto; padding:12px 0; }
+  .chip { height:40px; border:0; border-radius:999px; padding:0 14px; background:var(--surface); color:var(--muted); white-space:nowrap; box-shadow:0 0 0 1px rgba(255,255,255,.08); }
+  .chip.on { background:#e8e2d6; color:#0c0c0e; }
+  .law { width:100%; text-align:left; background:transparent; border:0; color:inherit; padding:0; }
+  .muted { color:var(--muted); font-size:14px; line-height:1.5; }
+  .tiny { color:var(--subtle); font-size:12px; }
+  a { color:var(--muted); }
+  ol.steps { list-style:none; margin:0; padding:0; }
+  ol.steps li { display:flex; gap:12px; padding:14px 0; border-top:1px solid var(--line); }
+  .n { width:28px; color:var(--subtle); font-variant-numeric:tabular-nums; }
+  .toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:var(--elev); padding:10px 14px; border-radius:12px; box-shadow:0 0 0 1px rgba(255,255,255,.1); display:none; z-index:9; }
+  .do { border-left:2px solid #e8e2d6; }
+  .dont { border-left:2px solid var(--red); }
+  video, audio { width:100%; border-radius:12px; background:#000; }
+  @media (prefers-reduced-motion: reduce) { .cell { animation:none; opacity:1; } }
+</style>
+</head>
+<body>
+<div class="lightbar" id="bar" aria-hidden="true"><div class="housing" id="leds"></div></div>
+<div class="wrap">
+  <header class="top">
+    <div><span class="brand">AEGIS</span><span class="sub">Florida</span></div>
+    <span class="tiny" id="liveflag" hidden>LIVE</span>
+  </header>
+
+  <section class="view on" id="view-stop">
+    <div class="row">
+      <p class="kicker">Florida stop counsel</p>
+      <div class="seg" role="tablist">
+        <button type="button" id="role-driver" class="on">Driver</button>
+        <button type="button" id="role-passenger">Passenger</button>
+      </div>
+    </div>
+    <h1 class="hero" id="headline">Lights on.<span>Hands visible.</span></h1>
+    <p class="meta" id="clock"></p>
+    <div class="grid two" style="margin-top:20px">
+      <div class="record-wrap">
+        <video id="preview" playsinline muted hidden></video>
+        <p class="meta" id="timer" hidden></p>
+        <div class="ring"><button class="rec" id="rec" type="button" aria-label="Record this stop"><span class="dot"></span></button></div>
+        <h2 id="rec-title" style="margin-top:12px;font-size:28px">Record this stop</h2>
+        <p class="muted" style="text-align:center;max-width:280px">Camera and microphone. The tape stays on this phone until you download or delete it.</p>
+        <p class="tiny" id="rec-error"></p>
+      </div>
+      <div id="lines"></div>
+    </div>
+    <div class="card" style="margin-top:20px" id="protocol"></div>
+    <div id="tapes" style="margin-top:16px"></div>
+  </section>
+
+  <section class="view" id="view-you">
+    <p class="kicker">The person in the car</p>
+    <h1 class="hero" style="font-size:40px">Do, and do not.</h1>
+    <div class="grid two" style="margin-top:16px">
+      <div id="dos"></div>
+      <div id="donts"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-officer">
+    <p class="kicker">The person at the glass</p>
+    <h1 class="hero" style="font-size:40px">May, and may not.</h1>
+    <div id="may" style="margin-top:16px"></div>
+    <div id="maynot" style="margin-top:20px"></div>
+  </section>
+
+  <section class="view" id="view-law">
+    <p class="kicker">Florida</p>
+    <h1 class="hero" style="font-size:40px">Twenty-five laws.</h1>
+    <input id="q" type="search" placeholder="Search citation or subject" style="margin-top:16px" />
+    <div class="chips" id="cats"></div>
+    <div id="laws"></div>
+  </section>
+
+  <section class="view" id="view-say">
+    <p class="kicker">Words a court can hear</p>
+    <h1 class="hero" style="font-size:40px">Say this.</h1>
+    <div class="chips" id="script-filters"></div>
+    <div id="scripts"></div>
+  </section>
+
+  <p class="tiny" style="margin-top:28px">Not legal advice. Florida law as of 2026. AEGIS is a rights companion, not a law firm. Open this page, then add it to your Home Screen to use it as an app.</p>
+</div>
+<nav class="tabs" aria-label="Primary">
+  <ul>
+    <li><button type="button" data-tab="stop" class="on">Stop</button></li>
+    <li><button type="button" data-tab="you">You</button></li>
+    <li><button type="button" data-tab="officer">Officer</button></li>
+    <li><button type="button" data-tab="law">Law</button></li>
+    <li><button type="button" data-tab="say">Say</button></li>
+  </ul>
+</nav>
+<div class="toast" id="toast"></div>
+<script id="data" type="application/json">{"laws":[{"id":"322.15","n":1,"cite":"F.S. § 322.15","title":"License carried and exhibited on demand","category":"Documents","atStop":"You must have a fully legible driver license in your immediate possession and present it when a law-enforcement officer demands it. A Florida digital proof of license may be shown, but if the officer cannot verify it on the spot you must produce the printed card.","detail":"Failure to display is a noncriminal, nonmoving infraction. The officer may take fingerprints on the citation. Always carry the physical card. Displaying a phone is not a search of the phone — hold the screen yourself.","href":"https://www.flsenate.gov/Laws/Statutes/2025/322.15"},{"id":"320.0605","n":2,"cite":"F.S. § 320.0605","title":"Certificate of registration — possession required","category":"Documents","atStop":"The registration (or an official/electronic copy, or qualifying rental paperwork) must be in the vehicle or on the operator and exhibited on demand of any authorized officer.","detail":"A violation is a noncriminal nonmoving infraction. The statute treats presenting a device to show registration as not constituting consent to access any other information on that device.","href":"https://www.flsenate.gov/Laws/Statutes/2025/320.0605"},{"id":"316.646","n":3,"cite":"F.S. § 316.646","title":"Proof of insurance (security)","category":"Documents","atStop":"While driving a vehicle that must be insured, you must keep proper proof of security and display it on demand. Paper or department-approved electronic proof is allowed.","detail":"The statute itself says presenting an electronic device to show insurance is not consent to access any other information on the device. An owner-operator who cannot later prove coverage was in force risks license and registration suspension.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.646"},{"id":"316.072","n":4,"cite":"F.S. § 316.072(3)","title":"Obedience to police and fire officials","category":"Conduct","atStop":"Willfully failing or refusing to comply with a lawful order or direction of a law-enforcement officer is a second-degree misdemeanor.","detail":"This covers lawful roadside directions — pull over, stay in the car, step out, move to the sidewalk. It does not convert an unlawful order into a lawful one, and it does not require you to answer investigative questions or consent to a search.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.072"},{"id":"316.1935","n":5,"cite":"F.S. § 316.1935","title":"Fleeing or attempting to elude","category":"Conduct","atStop":"If you know an officer has ordered you to stop, willfully refusing to stop — or stopping and then fleeing — is a third-degree felony. High-speed or wanton-disregard flight is worse; injury or death can be a first-degree felony with a three-year mandatory minimum.","detail":"A conviction requires license revocation for 1–5 years. The vehicle may be seized as contraband. Courts may not withhold adjudication. Always stop, even if you believe the stop is wrong. Challenge it later in court.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.1935"},{"id":"901.151","n":6,"cite":"F.S. § 901.151","title":"Florida Stop and Frisk Law","category":"Stop power","atStop":"An officer may temporarily detain you to ascertain identity and the circumstances of your presence when circumstances reasonably indicate you have committed, are committing, or are about to commit a crime.","detail":"The detention may last only as long as reasonably necessary and only in the immediate vicinity. A weapons frisk is separate: the officer needs probable cause to believe you are armed with a dangerous weapon and a threat. Evidence from a non-compliant frisk is inadmissible.","href":"https://www.flsenate.gov/Laws/Statutes/2025/901.151"},{"id":"843.02","n":7,"cite":"F.S. § 843.02","title":"Resisting an officer without violence","category":"Conduct","atStop":"Knowingly resisting, obstructing, or opposing an officer in the lawful execution of a legal duty — without violence — is a first-degree misdemeanor (up to 1 year and $1,000).","detail":"Typical roadside theories: tensing against cuffs, refusing a lawful order to exit, or physically blocking a lawful task. Remaining silent and refusing consent to a search are not, by themselves, obstruction. The officer must actually be engaged in a lawful duty.","href":"https://www.flsenate.gov/Laws/Statutes/2025/843.02"},{"id":"843.01","n":8,"cite":"F.S. § 843.01","title":"Resisting an officer with violence","category":"Conduct","atStop":"Offering or doing violence to an officer while resisting is a third-degree felony. Do not touch, shove, or swing at an officer, even if you think the stop is illegal.","detail":"Florida courts expect resistance to be litigated afterward. Roadside force against an officer is charged independently of whether the original stop survives a motion to suppress.","href":"https://www.flsenate.gov/Laws/Statutes/2025/843.01"},{"id":"316.193","n":9,"cite":"F.S. § 316.193","title":"Driving under the influence","category":"DUI","atStop":"It is unlawful to drive or be in actual physical control of a vehicle while under the influence of alcohol, chemical substances, or controlled substances to the extent that normal faculties are impaired, or with a breath-alcohol or blood-alcohol level of 0.08 or more.","detail":"DUI is a criminal traffic offense. A lawful DUI arrest is the gateway to implied-consent testing. Field sobriety exercises are generally voluntary; the chemical test after a lawful arrest is not treated the same way.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.193"},{"id":"316.1932","n":10,"cite":"F.S. § 316.1932","title":"Implied consent — breath, urine, or blood","category":"DUI","atStop":"By driving in Florida you are deemed to have consented to an approved breath, urine, or blood test if the request is incidental to a lawful arrest and the officer has reasonable cause to believe you were driving or in actual physical control while impaired.","detail":"A first refusal still suspends the privilege to drive for one year; a subsequent refusal, 18 months. Administrative suspension is separate from any criminal refusal charge. Roadside preliminary breath tests and post-arrest evidentiary tests are not the same procedure.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.1932"},{"id":"316.1939","n":11,"cite":"F.S. § 316.1939","title":"Refusal to submit to testing (Trenton’s Law)","category":"DUI","atStop":"As of October 1, 2025, refusing a lawful breath or urine test after the required warnings is itself a crime: a second-degree misdemeanor on a first refusal (up to 60 days and $500), a first-degree misdemeanor on a second or subsequent refusal.","detail":"The officer must have probable cause, a lawful arrest (with a narrow statutory exception), and must warn you that refusal suspends your license and is a criminal offense. Criminal and administrative cases proceed independently. This is not the roadside portable breath test, and it is not a field-sobriety exercise.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.1939"},{"id":"934.03","n":12,"cite":"F.S. § 934.03","title":"Recording and Florida’s all-party consent rule","category":"Recording","atStop":"Florida generally requires all-party consent to intercept an “oral communication.” That term only covers speech uttered with a reasonable expectation of privacy. Officers performing public duties on a public roadway typically have none.","detail":"The First Amendment, as applied in the Eleventh Circuit, protects recording police in public from a lawful vantage so long as you do not interfere. Do not secretly record a private conversation in a home or closed office. Openly recording a public stop is the lawful, safer path.","href":"https://www.flsenate.gov/Laws/Statutes/2025/934.03"},{"id":"843.31","n":13,"cite":"F.S. § 843.31","title":"Halo Law — 25-foot buffer after warning","category":"Recording","atStop":"After a verbal warning not to approach, it is a second-degree misdemeanor to knowingly remain within 25 feet of a first responder who is performing a lawful duty, if you intend to impede, threaten, or harass.","detail":"This is aimed at bystanders as much as occupants. If you are the driver in the stopped car you are already inside the stop. If you are filming from the sidewalk, comply with a 25-foot warning and keep recording from that distance. An order to stop recording, standing alone, is not the same as a distance order.","href":"https://www.flsenate.gov/Laws/Statutes/2025/843.31"},{"id":"art1-12","n":14,"cite":"Art. I, § 12, Fla. Const.","title":"Searches and seizures","category":"Search","atStop":"Florida’s Declaration of Rights guarantees freedom from unreasonable searches and seizures and is construed in conformity with the Fourth Amendment as interpreted by the U.S. Supreme Court.","detail":"Illegally obtained evidence is inadmissible if it would be inadmissible under Supreme Court Fourth Amendment doctrine. A traffic stop is a seizure. A citation is not a search warrant. Consent, probable cause plus the automobile exception, a valid inventory, or a proper search-incident-to-arrest are the usual vehicle-search paths.","href":"https://www.flsenate.gov/Laws/Constitution"},{"id":"316.614","n":15,"cite":"F.S. § 316.614","title":"Safety belt usage","category":"Traffic","atStop":"Florida is a primary seat-belt state. An officer may stop a vehicle solely for a belt violation. The driver, front-seat passengers, and children in required restraints are covered.","detail":"A belt infraction is noncriminal. It is one of the most common lawful bases for a stop, after which the officer may demand documents and observe plain-view evidence. Buckle before the wheels move.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.614"},{"id":"316.1936","n":16,"cite":"F.S. § 316.1936","title":"Open containers in vehicles","category":"Traffic","atStop":"Possessing an open container of alcohol in the passenger area of a vehicle on a public highway is unlawful. An open cup, bottle, or can in a cup holder is enough.","detail":"This is a common plain-view stop expander. Closed containers in a locked glove box or trunk are treated differently from an open drink in the cabin. Do not admit what is in the cup.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.1936"},{"id":"901.15","n":17,"cite":"F.S. § 901.15","title":"When a warrantless arrest is lawful","category":"Stop power","atStop":"An officer may arrest without a warrant for a felony, for a misdemeanor committed in the officer’s presence, and for specific statutory exceptions — including DUI and certain domestic-violence and traffic crimes.","detail":"Ordinary noncriminal traffic infractions (speeding, a broken lamp, no belt) are not themselves arrestable. The officer issues a citation. Criminal traffic — DUI, fleeing, reckless driving, leaving the scene — is different. If you are arrested, the script changes: silence and a lawyer.","href":"https://www.flsenate.gov/Laws/Statutes/2025/901.15"},{"id":"318.14","n":18,"cite":"F.S. § 318.14","title":"Noncriminal traffic infractions and citations","category":"Traffic","atStop":"Most moving and nonmoving violations are civil infractions, not crimes. You are cited to appear or to pay. Signing the citation is a promise to appear, not a guilty plea.","detail":"If you decline to sign, expect the officer to require a court appearance and, in many departments, to take you in to ensure it. Fight the ticket in court, not on the shoulder. Admitting the infraction by paying it can have license consequences.","href":"https://www.flsenate.gov/Laws/Statutes/2025/318.14"},{"id":"901.36","n":19,"cite":"F.S. § 901.36","title":"False name or false identification","category":"Conduct","atStop":"Giving a false name, false identification, or otherwise falsely identifying yourself after being arrested or lawfully detained is a crime. Do not invent a name or hand over someone else’s license.","detail":"Silence is not a false name. If you are the driver you must exhibit your real license under § 322.15. Passengers who are not independently detained generally need not identify themselves; if they do speak, it must be the truth.","href":"https://www.flsenate.gov/Laws/Statutes/2025/901.36"},{"id":"316.126","n":20,"cite":"F.S. § 316.126","title":"Move Over Law — emergency and patrol vehicles","category":"Traffic","atStop":"On approach of an authorized emergency or patrol vehicle with lights (and often siren) activated, yield, pull as far right as possible, and stop until it has passed — unless otherwise directed.","detail":"When a stopped emergency, sanitation, or utility vehicle is displaying warning lights, you must vacate the nearest lane or slow to 20 mph below the posted limit if a lane change is unsafe. This statute is both a duty when you are being pulled over and a common independent stop basis.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.126"},{"id":"316.305","n":21,"cite":"F.S. § 316.305","title":"Florida Ban on Texting While Driving","category":"Traffic","atStop":"Reading, sending, or composing a text-based communication on a wireless device while operating a motor vehicle is a primary offense — an officer may stop you for this alone.","detail":"Holding the phone to the officer’s eye-line is how many stops begin. Hands-free voice use and navigation displayed without typing are treated more favorably than handheld texting. Put the phone down before you pull over; do not start recording by fumbling in a pocket.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.305"},{"id":"322.34","n":22,"cite":"F.S. § 322.34","title":"Driving while license suspended, revoked, canceled, or disqualified","category":"Documents","atStop":"Knowingly driving with a suspended, revoked, canceled, or disqualified license is a criminal offense, with penalties that escalate on later convictions and in some cases become a felony.","detail":"A license check during a lawful stop will surface this immediately. If your privilege is not valid, do not argue it roadside. You still must stop and identify. A suspended-license stop often becomes a tow and an inventory search of the car — refuse consent anyway, and let counsel attack the inventory later.","href":"https://www.flsenate.gov/Laws/Statutes/2025/322.34"},{"id":"790.25","n":23,"cite":"F.S. § 790.25(4)","title":"Firearms in a private conveyance","category":"Search","atStop":"A person 18 or older in lawful possession may keep a handgun in the interior of a private vehicle if it is securely encased or not readily accessible for immediate use, and not carried on the person. A person authorized to carry under § 790.01(1) — including eligible permitless carry at 21+ — may carry concealed on the person in the vehicle.","detail":"Florida has no statutory duty to volunteer a firearm at a traffic stop. Keep your hands visible. If asked, answer truthfully and do not reach for it. Do not consent to a search of the rest of the car because a lawful firearm is present. Lawful possession is not probable cause of a crime.","href":"https://www.flsenate.gov/Laws/Statutes/2025/790.25"},{"id":"316.062","n":24,"cite":"F.S. § 316.062","title":"Duty to give information and render aid after a crash","category":"Conduct","atStop":"After a crash, the driver must give name, address, registration, and, on request, exhibit a license, and must render reasonable assistance to injured people, including arranging for medical help.","detail":"This is a crash-scene duty, not a general interrogation waiver. You provide the identifying and insurance information the statute names. You do not have to narrate how the crash happened. Leaving the scene of a crash with injury or death is a separate, serious crime under § 316.027.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.062"},{"id":"316.183","n":25,"cite":"F.S. § 316.183","title":"Unlawful speed","category":"Traffic","atStop":"No person shall drive at a speed greater than is reasonable and prudent under the conditions, and exceeding a posted maximum is prima facie unlawful. Speeding is the most common lawful basis for a Florida traffic stop.","detail":"A speed stop is a seizure. It authorizes the document demand and a brief investigation of the infraction. It does not, without more, authorize a trunk search, a prolonged detention for a dog, or a fishing expedition. When the citation is written, the mission of the stop is over unless new reasonable suspicion has arisen.","href":"https://www.flsenate.gov/Laws/Statutes/2025/316.183"}],"dos":[{"title":"Stop fully, then still","body":"Signal, leave the lane safely, and park as far right as the shoulder allows — preferably under a light. Engine off. Radio off. Night: cabin light on so your hands read clearly. Windows down enough to speak and pass documents."},{"title":"Hands on the wheel, then announce the reach","body":"Ten and two, both hands visible, until the officer is at the glass. Then: “Officer, my license is in my wallet / the registration is in the glove box. I am going to reach for it.” Sudden silent reaching is how stops go badly."},{"title":"Produce the three documents","body":"Florida requires the driver to exhibit a license (§ 322.15), registration (§ 320.0605), and proof of insurance (§ 316.646). Have them stacked before you are asked. Electronic proof is allowed; handing a phone is not consent to search the phone."},{"title":"Stay in the car unless ordered out","body":"Do not step out to be friendly. If ordered out, step out. The Supreme Court allows that order (Pennsylvania v. Mimms). Argue it in a motion, not on the asphalt."},{"title":"Be brief, then silent","body":"Courtesy is not a confession. “Good evening, officer.” Then documents. After that, the script: you do not consent to searches and you do not answer investigative questions. Repeat once. Stop talking."},{"title":"Record from where you sit","body":"Openly recording a public stop is protected. Start recording before the officer reaches the window if you can do it without fumbling. Announce it once, calmly. Do not stick a phone in the officer’s face."},{"title":"Ask the only diagnostic question","body":"“Am I being detained, or am I free to leave?” If you are free to leave, leave calmly. If you are detained, you still do not have to answer questions. Passengers ask this too."},{"title":"Invoke counsel in words a court can hear","body":"If the stop becomes an arrest or a full interrogation: “I am remaining silent. I want a lawyer.” Then actually remain silent. Qualifiers (“I think I should maybe get a lawyer”) are weaker."},{"title":"Sign a citation as a promise to appear","body":"A Florida traffic citation is not a guilty plea. Signing it is how you are released to fight it later. Refusing to sign often means a trip to the station. Fight the ticket in court."},{"title":"Write the stop down when you are gone","body":"Time, location, agency, badge or name, patrol-car number, who else was in the car, what was asked, whether you were ordered out, whether you consented, whether a dog arrived. Memory decays in hours."}],"donts":[{"title":"Do not flee, creep, or “finish the block”","body":"Willfully failing to stop after you know you have been ordered to stop is a third-degree felony under § 316.1935. High-speed flight is worse. There is no clean version of not stopping."},{"title":"Do not argue the stop on the roadside","body":"“You have no right” is not a defense; it is a transcript. The place to contest reasonable suspicion, a prolonged detention, or a bad search is a courtroom with a lawyer and a recording."},{"title":"Do not consent","body":"“Do you mind if I search?” is a request, not an order. “I do not consent to any search” is a complete answer. Consent is the easiest way an otherwise illegal search becomes legal."},{"title":"Do not volunteer a narrative","body":"Where you are coming from, whether you have been drinking, what is in the trunk, whose weed that is — none of that is required. Officers are allowed to ask. You are allowed not to answer."},{"title":"Do not lie","body":"A false name or false ID after a lawful detention is its own crime (§ 901.36). Silence is lawful. Fiction is not. If you speak, it has to be true."},{"title":"Do not physically resist","body":"Even a tense arm or a pulled-away wrist is charged as resisting without violence (§ 843.02). Violence against an officer is a felony. Unlawful orders are undone by judges, not by muscles."},{"title":"Do not reach for a firearm","body":"If you carry, keep your hands on the wheel. Florida has no statutory duty to volunteer a gun. If asked, say so without reaching, and wait for instructions. Lawful possession is not a crime; a sudden reach looks like one."},{"title":"Do not hand over an unlocked phone for “a look”","body":"Riley v. California requires a warrant for a phone search. Florida’s insurance and registration statutes say that displaying proof on a device is not consent to the rest of the device. Hold the screen yourself."},{"title":"Do not perform “just to be cooperative” tests you can decline","body":"Roadside field-sobriety exercises are generally voluntary. Reciting the alphabet backwards is not required. Chemical testing after a lawful DUI arrest is a different legal regime — implied consent and, since 2025, a criminal refusal."},{"title":"Do not talk after you have invoked","body":"Every word after “I want a lawyer” can be treated as a waiver. Small talk, jokes, “off the record,” and explaining yourself are all on the recording. Invoke, then stop."}],"may":[{"title":"Stop the vehicle on reasonable suspicion","basis":"Fourth Amendment · Art. I, § 12 · Terry / Whren","body":"An officer needs reasonable suspicion of a traffic infraction or a crime — a specific, articulable reason, not a hunch. A lawful observed violation (speed, belt, lamp, texting) is enough, even if the officer also hopes to investigate something else (Whren v. United States)."},{"title":"Demand the driver’s license, registration, and insurance","basis":"F.S. §§ 322.15, 320.0605, 316.646","body":"These three are not optional for the driver. The officer does not need extra suspicion to ask for them during a valid stop. Digital display is allowed; it is not a phone-search consent."},{"title":"Order the driver out of the car","basis":"Pennsylvania v. Mimms","body":"For officer safety, a driver may be ordered out of a lawfully stopped vehicle as a matter of course. Comply. The order does not, by itself, authorize a search of the cabin."},{"title":"Order passengers out, and hold them for the stop","basis":"Maryland v. Wilson · Presley v. State (Fla. 2017)","body":"Passengers are seized when the car is seized (Brendlin). Florida’s Supreme Court holds they may be detained for the reasonable duration of the stop. They may be ordered out. They still need not answer questions."},{"title":"Look through the glass — plain view","basis":"Plain-view doctrine","body":"Anything an officer can see from a lawful vantage — a weapon on the seat, an open container, a bag of pills on the console — may be noted and, if immediately incriminating, seized. Tinting and a clean cabin matter more than people think."},{"title":"Run the plate, the license, and outstanding warrants","basis":"Ordinary stop mission","body":"Checking license status, registration, insurance databases, and warrants is part of a routine stop. An active warrant can convert a ticket stop into an arrest."},{"title":"Ask questions — including incriminating ones","basis":"Berkemer v. McCarty","body":"Roadside questioning during a typical stop is not automatically a custodial interrogation. Miranda warnings are usually not required yet. You still do not have to answer. “Do you know why I stopped you?” is a question, not a command."},{"title":"Frisk for weapons on the Florida statutory standard","basis":"F.S. § 901.151(5)","body":"Florida’s Stop and Frisk Law allows a weapons search of a temporarily detained person when the officer has probable cause to believe the person is armed with a dangerous weapon and therefore a threat. That is a higher statutory phrase than classic Terry “reasonable suspicion,” and a non-compliant frisk can suppress the fruit."},{"title":"Search the car without a warrant in recognized exceptions","basis":"Automobile exception · Gant · inventory","body":"Probable cause that the vehicle contains evidence of a crime (Carroll / automobile exception). A proper search incident to arrest under Arizona v. Gant. A true inventory after a lawful impound, following standardized policy. Or consent. A citation alone is not enough (Knowles v. Iowa)."},{"title":"Walk a dog around the car if it does not prolong the stop","basis":"Illinois v. Caballes · Rodriguez v. United States","body":"A sniff of the exterior during the time already needed to write the ticket is generally allowed. Holding you extra minutes to wait for a dog, without new reasonable suspicion, is not."},{"title":"Arrest for crimes the statute allows without a warrant","basis":"F.S. § 901.15 · DUI · fleeing · reckless","body":"Felonies, misdemeanors in the officer’s presence, DUI, and other listed exceptions. Ordinary civil infractions are cited, not booked — unless a criminal offense appears during the stop."},{"title":"After a lawful DUI arrest, request a chemical test","basis":"F.S. §§ 316.1932, 316.1939","body":"Implied consent attaches to a lawful arrest plus reasonable cause. Refusal has administrative and, since October 1, 2025, criminal consequences. Field-sobriety exercises before arrest remain a different, generally voluntary, request."}],"mayNot":[{"title":"Stop you on a hunch, a profile, or a guess","basis":"Terry · Art. I, § 12","body":"A feeling, a neighborhood, a rental car, or “nervousness” standing alone is not reasonable suspicion. Without a lawful stop, everything that follows is at risk of suppression."},{"title":"Search the car because you received a ticket","basis":"Knowles v. Iowa","body":"Issuing a citation does not carry the automatic search power of a custodial arrest. “I stopped you for speed, so I get the trunk” is not the law."},{"title":"Prolong the stop to fish","basis":"Rodriguez v. United States","body":"When the tasks tied to the traffic infraction are done — or reasonably should be — the authority for the seizure ends, unless new reasonable suspicion of another crime has arisen. Extra questions are allowed only if they do not extend the stop."},{"title":"Treat a refused consent as probable cause","basis":"Fourth Amendment","body":"You have a right to say no. Asserting it cannot be the suspicion that then justifies the search you refused. Officers may still look for an independent exception. You still say no."},{"title":"Search a phone because you showed insurance on it","basis":"Riley v. California · F.S. §§ 316.646, 320.0605, 322.15","body":"A warrant is required to search a phone, absent a true emergency. Florida’s document statutes expressly provide that presenting electronic proof is not consent to other data on the device."},{"title":"Order you to stop recording a public stop merely because they dislike it","basis":"First Amendment · Eleventh Circuit · F.S. § 934.03","body":"Recording officers in public, from a lawful place, without interference, is protected. They may give safety and distance orders (including a Halo Law 25-foot warning to bystanders). They may not lawfully delete your video or unlock your phone to do it."},{"title":"Require passengers to identify themselves on a routine ticket stop","basis":"F.S. § 901.151 (needs criminal indication) · Hiibel context","body":"Florida’s stop-and-identify power is tied to a temporary detention for suspected crime, not to being a quiet passenger in a speeding car. Independent reasonable suspicion changes this. Drivers still must show a license."},{"title":"Frisk without the weapons predicate","basis":"F.S. § 901.151(5)","body":"A stop is not a frisk. Florida requires probable cause to believe the detained person is armed with a dangerous weapon and a threat. A generalized “everyone gets patted” is not the statute."},{"title":"Force field-sobriety exercises","basis":"Voluntary roadside tests vs. implied consent","body":"Walk-and-turn, one-leg stand, and HGN are requests. You may decline. The chemical test after a lawful DUI arrest is the implied-consent procedure, with its own warnings and penalties. Do not confuse the two, and do not be bullied into the first because of the second."},{"title":"Compel answers to investigative questions","basis":"Fifth Amendment · Art. I, § 9","body":"“Where are you coming from,” “how much have you had,” “whose bag is that” are questions. Documents are required of the driver. A confession is not. After arrest, interrogation without Miranda and a valid waiver is suppressible."},{"title":"Use a traffic stop as a general warrant for closed containers","basis":"Automobile exception still needs probable cause","body":"Locked glove boxes, backpacks, and the trunk are not automatically inside a speeding stop. Plain view, probable cause, consent, or a valid inventory are required. “Mind if I take a look” is still a request."},{"title":"Punish you for remaining silent or asking for a lawyer","basis":"Fifth Amendment · Miranda","body":"Silence and a clear request for counsel cannot be the crime. They can be the moment the conversation should end. Invoke out loud so the recording has it, then stop adding words."}],"scripts":[{"id":"opening","kicker":"First thirty seconds","title":"Hands, then documents","role":"Driver","say":"Good evening, officer. My hands are on the wheel. I am going to keep them there. My license, registration, and insurance are here — I will get them slowly when you ask.","when":"The moment the officer is at the window. Night or day. Before any small talk.","why":"Florida requires the three documents. Announcing the reach keeps a lawful document exchange from looking like a furtive movement. Courtesy without a story."},{"id":"silence","kicker":"After documents","title":"Remain silent","role":"Either","say":"Officer, I mean no disrespect. I prefer not to answer questions. I am going to remain silent.","when":"As soon as the questions leave the three documents — destination, drinking, whose car, what is in the bag, “do you know why I stopped you.”","why":"You are not required to help the investigation. A clean, early invocation is easier for a court to honor than a rambling explanation. Say it once. Then actually stop."},{"id":"search","kicker":"The ask","title":"Refuse consent to search","role":"Either","say":"Officer, I do not consent to any search of my person, my vehicle, my phone, or my belongings. I do not consent.","when":"The first time you hear “mind if I search,” “pop the trunk,” “any reason I shouldn’t take a look,” or a hand on the door to rummage.","why":"Consent is the most common way a roadside search becomes legal. A clear no is not obstruction. Repeat it if they ask again. Do not add “because I have nothing to hide.”"},{"id":"detained","kicker":"Diagnostic","title":"Detained or free to leave","role":"Either","say":"Officer, am I being detained, or am I free to leave?","when":"When the ticket seems done, when you are a passenger, or when the conversation has drifted past the infraction. Ask once. Wait for the answer.","why":"If you are free to leave, leave. If you are detained, the clock and the recording now matter. The question forces the officer to name the seizure."},{"id":"record","kicker":"Tape","title":"Announce the recording","role":"Either","say":"Officer, I am recording this stop for my safety and yours. I will not interfere.","when":"Once, when recording starts or when the officer notices the phone. Not as a challenge. As a fact.","why":"Open recording of public official duties is protected. Announcing it removes any later claim of secret interception under § 934.03 and keeps the encounter from turning on surprise."},{"id":"fst","kicker":"DUI branch","title":"Decline field sobriety exercises","role":"Driver","say":"Officer, I respectfully decline field sobriety exercises. I will not answer questions about alcohol or medication. I do not consent to a search.","when":"“Step out for some tests,” alphabet, one-leg stand, follow-the-pen, roadside portable breath. Before you start performing.","why":"Those exercises are generally voluntary and exist to build probable cause. Declining them is not the same as refusing a post-arrest chemical test under implied consent. Do not confuse the two."},{"id":"chemical","kicker":"After a DUI arrest","title":"Chemical test — know the 2025 rule","role":"Driver","say":"I want a lawyer. I will not answer questions. Please read me the implied-consent warning. I will decide after I have heard the full warning.","when":"Only after you are under arrest for DUI and the officer is requesting a breath, urine, or blood test. Not for the roadside portable device, unless they treat it as the statutory test.","why":"Since October 1, 2025, a first refusal of a lawful breath or urine test is a second-degree misdemeanor on top of a one-year suspension. Listen to the warning. This is not the moment for a guess. Ask for counsel and hear the statutory words."},{"id":"arrest","kicker":"If you are arrested","title":"Silence and counsel","role":"Either","say":"I am remaining silent. I want a lawyer. I do not consent to any search. I will not answer questions without my attorney.","when":"Cuffs, “you’re under arrest,” being walked to the car, or any time the stop is clearly no longer a ticket. Say it to the recording. Then stop.","why":"Miranda rights attach to custodial interrogation. Ambiguous “maybe I should get a lawyer” is weaker than a flat demand. Talking after this line is how invocations get waived."},{"id":"passenger","kicker":"Passenger","title":"Passenger’s line","role":"Passenger","say":"Officer, I am a passenger. Am I being detained? I do not want to answer questions. I do not consent to a search of my person or my belongings.","when":"As soon as attention turns to you — ID demand, “where are you coming from,” a bag at your feet, an order to get out.","why":"You are seized for the stop, but a routine ticket does not, without more, require you to identify yourself. If independent suspicion appears, the ground shifts. Do not lie. Do not claim the driver’s property as yours."},{"id":"firearm","kicker":"If asked about a firearm","title":"Lawful carry, no reach","role":"Either","say":"Officer, I do have a firearm. It is [in the glove box / securely encased / on my person]. I am not reaching for it. My hands will stay where you can see them. How would you like me to proceed?","when":"Only if asked. Florida has no statutory duty to volunteer a firearm at a traffic stop. Do not announce it as small talk.","why":"A sudden reach is the danger. Truthful, slow, hands visible. Lawful possession under § 790.25 or § 790.01 is not probable cause to search the rest of the car. Still refuse consent."},{"id":"phone","kicker":"Electronic documents","title":"Show, do not surrender, the phone","role":"Driver","say":"Officer, my proof is on this screen. I will hold the phone and display it. I do not consent to you handling the device or searching it.","when":"You are using Florida digital insurance, registration, or a digital license. The officer wants to take the phone.","why":"Sections 316.646 and 320.0605 treat presenting a device as not constituting consent to other information on it. Hold the glass. If they cannot verify a digital license, produce the printed card."},{"id":"prolong","kicker":"When it drags","title":"Close the mission","role":"Driver","say":"Officer, I have given you my license, registration, and insurance. I do not consent to a search. I do not want to answer questions. If I am free to leave, I would like to leave.","when":"The citation is written, or should be, and a second officer, a dog, or a new line of questioning appears without explanation.","why":"Rodriguez v. United States: a stop may not be prolonged beyond the traffic mission without new reasonable suspicion. This line marks the moment on the recording."}],"driverProtocol":[{"n":"01","title":"Leave the lane","body":"Signal. Pull as far right as the shoulder allows. Prefer light. Park. Engine off. Radio off."},{"n":"02","title":"Hands, then cabin light","body":"Both hands on the wheel, high and still. At night, interior light on so your hands read clearly."},{"n":"03","title":"Start the tape","body":"Record before the officer reaches the glass if you can do it without fumbling. Announce it once."},{"n":"04","title":"Announce every reach","body":"“Officer, my license is in my wallet. I am going to reach for it.” Sudden silent reaching is how stops go badly."},{"n":"05","title":"Three documents, then silence","body":"Florida requires license, registration, and insurance. After those, you do not have to explain, narrate, or consent."},{"n":"06","title":"No consent. No story.","body":"If they ask to search, say no. If they ask where you have been, remain silent. Fight it in court, not on the shoulder."}],"passengerProtocol":[{"n":"01","title":"Stay seated","body":"Hands visible. Do not exit unless ordered. Do not rummage. Do not reach into the driver’s space."},{"n":"02","title":"You are in the stop","body":"Passengers are seized when the car is. That does not make you the driver, and it does not waive your silence."},{"n":"03","title":"Start the tape","body":"Open recording of a public stop is protected. Do not interfere. Do not approach the officer if told to stay back."},{"n":"04","title":"Identity is not automatic","body":"A routine ticket stop does not, without more, require a quiet passenger to produce identification."},{"n":"05","title":"Ask the diagnostic","body":"“Officer, am I being detained, or am I free to leave?” Wait for the answer. Then act on it."},{"n":"06","title":"No consent. No story.","body":"Your bag is yours. Do not claim the driver’s property. Do not lie. Silence is lawful. Fiction is not."}]}</script>
+<script>
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const leds = document.getElementById("leds");
+for (let i = 0; i < 18; i++) {
+  const s = document.createElement("span");
+  s.className = "cell " + (i < 9 ? "r" : "b");
+  leds.appendChild(s);
+}
+let role = localStorage.getItem("aegis-role") === "passenger" ? "passenger" : "driver";
+let tab = "stop";
+let cat = "All";
+let scriptRole = "All";
+let openLaw = DATA.laws[0]?.id || null;
+let recording = false;
+let recorder, chunks = [], stream, tick, startedAt, mime = "video/webm";
+
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.style.display = "block";
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.style.display = "none"; }, 1800);
+}
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, (c) => ({ "&":"&","<":"<",">":">",'"':""" }[c]));
+}
+async function copy(text, label) {
+  try { await navigator.clipboard.writeText(text); toast(label + " copied"); }
+  catch { toast("Could not copy"); }
+}
+function setTab(next) {
+  tab = next;
+  document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === "view-" + next));
+  document.querySelectorAll("nav.tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === next));
+}
+function linesForRole() {
+  const ids = role === "passenger" ? ["passenger","silence","search"] : ["opening","silence","search"];
+  const kickers = ["Say first","Then","If they ask to search"];
+  return ids.map((id, i) => {
+    const s = DATA.scripts.find((x) => x.id === id);
+    return s ? { kicker: kickers[i], say: s.say, title: s.title } : null;
+  }).filter(Boolean);
+}
+function renderStop() {
+  document.getElementById("role-driver").classList.toggle("on", role === "driver");
+  document.getElementById("role-passenger").classList.toggle("on", role === "passenger");
+  document.getElementById("headline").innerHTML = role === "passenger" ? "Stay seated.<span>Hands visible.</span>" : "Lights on.<span>Hands visible.</span>";
+  document.getElementById("lines").innerHTML = linesForRole().map((l) =>
+    '<article class="card"><div class="row"><p class="kicker">' + esc(l.kicker) + '</p><button type="button" data-copy="' + esc(l.say) + '">Copy</button></div><p class="say">“' + esc(l.say) + '”</p></article>'
+  ).join("");
+  const steps = role === "passenger" ? DATA.passengerProtocol : DATA.driverProtocol;
+  document.getElementById("protocol").innerHTML = '<p class="kicker">First thirty seconds</p><h2 style="font-size:28px;margin-top:4px">' + (role === "passenger" ? "Passenger protocol" : "Driver protocol") + '</h2><ol class="steps">' +
+    steps.map((s) => '<li><span class="n">' + esc(s.n) + '</span><div><strong>' + esc(s.title) + '</strong><p class="muted">' + esc(s.body) + '</p></div></li>').join("") + "</ol>";
+}
+function items(title, list, cls) {
+  return '<h2 style="font-size:32px">' + title + '</h2>' + list.map((item, i) =>
+    '<article class="card ' + cls + '" style="margin-top:12px"><strong>' + String(i+1).padStart(2,"0") + "  " + esc(item.title) + '</strong><p class="muted">' + esc(item.body) + '</p></article>'
+  ).join("");
+}
+function authority(title, list, cls) {
+  return '<h2 style="font-size:32px">' + title + '</h2>' + list.map((item) =>
+    '<article class="card ' + cls + '" style="margin-top:12px"><strong>' + esc(item.title) + '</strong><p class="tiny">' + esc(item.basis) + '</p><p class="muted">' + esc(item.body) + '</p></article>'
+  ).join("");
+}
+function renderStatic() {
+  document.getElementById("dos").innerHTML = items("Do", DATA.dos, "do");
+  document.getElementById("donts").innerHTML = items("Do not", DATA.donts, "dont");
+  document.getElementById("may").innerHTML = authority("The officer may", DATA.may, "do");
+  document.getElementById("maynot").innerHTML = authority("The officer may not", DATA.mayNot, "dont");
+  const cats = ["All", ...new Set(DATA.laws.map((l) => l.category))];
+  document.getElementById("cats").innerHTML = cats.map((c) => '<button type="button" class="chip' + (c===cat?" on":"") + '" data-cat="' + esc(c) + '">' + esc(c) + '</button>').join("");
+  renderLaws();
+  document.getElementById("script-filters").innerHTML = ["All","Driver","Passenger"].map((c) =>
+    '<button type="button" class="chip' + (c===scriptRole?" on":"") + '" data-srole="' + c + '">' + c + '</button>').join("");
+  renderScripts();
+}
+function renderLaws() {
+  const q = (document.getElementById("q").value || "").trim().toLowerCase();
+  const list = DATA.laws.filter((law) => {
+    if (cat !== "All" && law.category !== cat) return false;
+    if (!q) return true;
+    return (law.cite + law.title + law.atStop + law.detail).toLowerCase().includes(q);
+  });
+  document.getElementById("laws").innerHTML = list.map((law) => {
+    const open = openLaw === law.id;
+    return '<article class="card" style="margin-top:10px"><button class="law" type="button" data-law="' + esc(law.id) + '"><span class="tiny">' + esc(law.cite) + '</span><br><strong>' + esc(law.title) + '</strong></button>' +
+      (open ? '<p class="kicker" style="margin-top:10px">At the stop</p><p>' + esc(law.atStop) + '</p><p class="muted">' + esc(law.detail) + '</p><p><a href="' + esc(law.href) + '" target="_blank" rel="noreferrer">Read the statute</a></p>' : "") +
+      '</article>';
+  }).join("") || '<p class="muted">No statute matches that search.</p>';
+}
+function renderScripts() {
+  const list = DATA.scripts.filter((s) => scriptRole === "All" || s.role === scriptRole || s.role === "Either");
+  document.getElementById("scripts").innerHTML = list.map((s) =>
+    '<article class="card" style="margin-top:12px"><div class="row"><div><p class="kicker">' + esc(s.kicker) + " · " + esc(s.role) + '</p><h2 style="font-size:26px">' + esc(s.title) + '</h2></div><button type="button" data-copy="' + esc(s.say) + '">Copy</button></div><p class="say">“' + esc(s.say) + '”</p><p class="muted"><strong style="color:var(--fg)">When. </strong>' + esc(s.when) + '</p><p class="muted"><strong style="color:var(--fg)">Why. </strong>' + esc(s.why) + '</p></article>'
+  ).join("");
+}
+function tickClock() {
+  document.getElementById("clock").textContent = new Intl.DateTimeFormat("en-US", { timeZone:"America/New_York", weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", hour12:true }).format(new Date());
+}
+
+const DB = "aegis-recordings", STORE = "clips";
+function openDb() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB, 1);
+    req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(STORE)) req.result.createObjectStore(STORE, { keyPath:"id" }); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function saveClip(clip) {
+  const db = await openDb();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+    tx.objectStore(STORE).put(clip);
+  });
+  db.close();
+}
+async function listClips() {
+  const db = await openDb();
+  const clips = await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readonly");
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+  db.close();
+  return clips.sort((a,b) => b.createdAt - a.createdAt);
+}
+async function deleteClip(id) {
+  const db = await openDb();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+    tx.objectStore(STORE).delete(id);
+  });
+  db.close();
+}
+async function renderTapes() {
+  let clips = [];
+  try { clips = await listClips(); } catch { clips = []; }
+  const root = document.getElementById("tapes");
+  if (!clips.length) { root.innerHTML = ""; return; }
+  root.innerHTML = '<p class="kicker">On this phone</p>' + clips.map((c) => {
+    const url = URL.createObjectURL(c.blob);
+    const media = c.mimeType.startsWith("audio/") ? '<audio controls src="' + url + '"></audio>' : '<video controls src="' + url + '"></video>';
+    return '<article class="card" style="margin-top:10px" data-url="' + url + '">' + media +
+      '<div class="row" style="margin-top:8px"><span class="tiny">' + new Date(c.createdAt).toLocaleString() + '</span><span><a download="aegis-stop.webm" href="' + url + '">Download</a> · <button type="button" data-del="' + esc(c.id) + '">Delete</button></span></div></article>';
+  }).join("");
+}
+function pickMime(hasVideo) {
+  const list = hasVideo ? ["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"] : ["audio/webm","audio/mp4"];
+  for (const t of list) if (window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t;
+  return hasVideo ? "video/webm" : "audio/webm";
+}
+async function startRec() {
+  document.getElementById("rec-error").textContent = "";
+  if (!navigator.mediaDevices?.getUserMedia) { document.getElementById("rec-error").textContent = "This browser cannot record."; return; }
+  try {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio:true, video:{ facingMode:{ ideal:"environment" } } });
+    } catch {
+      stream = await navigator.mediaDevices.getUserMedia({ audio:true, video:false });
+    }
+    const hasVideo = stream.getVideoTracks().length > 0;
+    mime = pickMime(hasVideo);
+    chunks = [];
+    recorder = new MediaRecorder(stream, { mimeType: mime });
+    recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+    startedAt = Date.now();
+    recorder.start(1000);
+    recording = true;
+    document.getElementById("bar").classList.add("live");
+    document.getElementById("rec").classList.add("on");
+    document.getElementById("rec").setAttribute("aria-label", "Stop recording");
+    document.getElementById("rec-title").textContent = "Recording";
+    document.getElementById("liveflag").hidden = false;
+    const video = document.getElementById("preview");
+    const timer = document.getElementById("timer");
+    timer.hidden = false;
+    if (hasVideo) { video.hidden = false; video.srcObject = stream; video.play().catch(()=>{}); }
+    clearInterval(tick);
+    tick = setInterval(() => {
+      const s = Math.floor((Date.now()-startedAt)/1000);
+      timer.textContent = String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0") + (hasVideo ? "" : " · audio only");
+    }, 250);
+  } catch (err) {
+    recording = false;
+    const name = err && err.name;
+    document.getElementById("rec-error").textContent = name === "NotAllowedError" ? "Allow the camera and microphone, then record again." : "Could not start recording.";
+  }
+}
+async function stopRec() {
+  clearInterval(tick);
+  const rec = recorder;
+  const blob = await new Promise((resolve) => {
+    if (!rec || rec.state === "inactive") { resolve(chunks.length ? new Blob(chunks, { type: mime }) : null); return; }
+    rec.onstop = () => resolve(chunks.length ? new Blob(chunks, { type: mime }) : null);
+    try { rec.stop(); } catch { resolve(chunks.length ? new Blob(chunks, { type: mime }) : null); }
+  });
+  stream?.getTracks().forEach((t) => t.stop());
+  const video = document.getElementById("preview");
+  video.srcObject = null; video.hidden = true;
+  recording = false;
+  document.getElementById("bar").classList.remove("live");
+  document.getElementById("rec").classList.remove("on");
+  document.getElementById("rec").setAttribute("aria-label", "Record this stop");
+  document.getElementById("rec-title").textContent = "Record this stop";
+  document.getElementById("liveflag").hidden = true;
+  document.getElementById("timer").hidden = true;
+  if (!blob || blob.size < 200) { document.getElementById("rec-error").textContent = "That recording was too short to save."; return; }
+  await saveClip({ id: Date.now().toString(36), createdAt: startedAt || Date.now(), durationMs: Date.now() - (startedAt||Date.now()), mimeType: blob.type || mime, blob });
+  toast("Stop saved on this phone");
+  renderTapes();
+}
+
+document.getElementById("role-driver").onclick = () => { role = "driver"; localStorage.setItem("aegis-role","driver"); renderStop(); };
+document.getElementById("role-passenger").onclick = () => { role = "passenger"; localStorage.setItem("aegis-role","passenger"); renderStop(); };
+document.getElementById("rec").onclick = () => { if (recording) stopRec(); else startRec(); };
+document.body.addEventListener("click", async (e) => {
+  const tabBtn = e.target.closest("nav.tabs button");
+  if (tabBtn) { setTab(tabBtn.dataset.tab); return; }
+  const copyBtn = e.target.closest("[data-copy]");
+  if (copyBtn) { copy(copyBtn.getAttribute("data-copy"), "Line"); return; }
+  const catBtn = e.target.closest("[data-cat]");
+  if (catBtn) { cat = catBtn.dataset.cat; document.querySelectorAll("[data-cat]").forEach((b)=>b.classList.toggle("on", b===catBtn)); renderLaws(); return; }
+  const lawBtn = e.target.closest("[data-law]");
+  if (lawBtn) { openLaw = openLaw === lawBtn.dataset.law ? null : lawBtn.dataset.law; renderLaws(); return; }
+  const sBtn = e.target.closest("[data-srole]");
+  if (sBtn) { scriptRole = sBtn.dataset.srole; document.querySelectorAll("[data-srole]").forEach((b)=>b.classList.toggle("on", b===sBtn)); renderScripts(); return; }
+  const del = e.target.closest("[data-del]");
+  if (del) { await deleteClip(del.dataset.del); toast("Tape deleted"); renderTapes(); }
+});
+document.getElementById("q").addEventListener("input", renderLaws);
+renderStatic();
+renderStop();
+renderTapes();
+tickClock();
+setInterval(tickClock, 1000);
+</script>
+</body>
+</html>
